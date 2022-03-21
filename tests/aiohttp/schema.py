@@ -58,17 +58,11 @@ class Mutation:
 
     @strawberry.mutation
     def read_files(self, files: typing.List[Upload]) -> typing.List[str]:
-        contents = []
-        for file in files:
-            contents.append(file.read().decode())
-        return contents
+        return [file.read().decode() for file in files]
 
     @strawberry.mutation
     def read_folder(self, folder: FolderInput) -> typing.List[str]:
-        contents = []
-        for file in folder.files:
-            contents.append(file.read().decode())
-        return contents
+        return [file.read().decode() for file in folder.files]
 
 
 @strawberry.type
@@ -103,9 +97,6 @@ class Subscription:
     @strawberry.subscription
     async def exception(self, message: str) -> typing.AsyncGenerator[str, None]:
         raise ValueError(message)
-
-        # Without this yield, the method is not recognised as an async generator
-        yield "Hi"  # noqa
 
     @strawberry.subscription
     async def flavors(self) -> typing.AsyncGenerator[Flavor, None]:

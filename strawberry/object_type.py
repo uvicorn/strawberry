@@ -28,9 +28,7 @@ def _get_interfaces(cls: Type) -> List[TypeDefinition]:
         if type_definition and type_definition.is_interface:
             interfaces.append(type_definition)
 
-        for inherited_interface in _get_interfaces(base):
-            interfaces.append(inherited_interface)
-
+        interfaces.extend(iter(_get_interfaces(base)))
     return interfaces
 
 
@@ -53,27 +51,22 @@ def _check_field_annotations(cls: Type):
 
         # If the field is a StrawberryField we need to do a bit of extra work
         # to make sure dataclasses.dataclass is ready for it
-        if isinstance(field_, StrawberryField):
+        if (
+            isinstance(field_, StrawberryField)
+            and field_name not in cls_annotations
+        ):
+            # If the field uses the default resolver, the field _must_ be
+            # annotated
+            if not field_.base_resolver:
+                raise MissingFieldAnnotationError(field_name)
 
-            # Make sure the cls has an annotation
-            if field_name not in cls_annotations:
-                # If the field uses the default resolver, the field _must_ be
-                # annotated
-                if not field_.base_resolver:
-                    raise MissingFieldAnnotationError(field_name)
+            # The resolver _must_ have a return type annotation
+            # TODO: Maybe check this immediately when adding resolver to
+            #       field
+            if field_.base_resolver.type_annotation is None:
+                raise MissingReturnAnnotationError(field_name)
 
-                # The resolver _must_ have a return type annotation
-                # TODO: Maybe check this immediately when adding resolver to
-                #       field
-                if field_.base_resolver.type_annotation is None:
-                    raise MissingReturnAnnotationError(field_name)
-
-                cls_annotations[field_name] = field_.base_resolver.type_annotation
-
-            # TODO: Make sure the cls annotation agrees with the field's type
-            # >>> if cls_annotations[field_name] != field.base_resolver.type:
-            # >>>     # TODO: Proper error
-            # >>>    raise Exception
+            cls_annotations[field_name] = field_.base_resolver.type_annotation
 
         # If somehow a non-StrawberryField field is added to the cls without annotations
         # it raises an exception. This would occur if someone manually uses

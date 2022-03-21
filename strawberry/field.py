@@ -148,10 +148,7 @@ class StrawberryField(dataclasses.Field):
 
     @property
     def arguments(self) -> List[StrawberryArgument]:
-        if not self.base_resolver:
-            return []
-
-        return self.base_resolver.arguments
+        return self.base_resolver.arguments if self.base_resolver else []
 
     def _python_name(self) -> Optional[str]:
         if self.name:
@@ -202,10 +199,11 @@ class StrawberryField(dataclasses.Field):
         # our `type` property tries to find the field type from the global namespace
         # but it is not yet defined.
         try:
-            if self.base_resolver is not None:
-                # Handle unannotated functions (such as lambdas)
-                if self.base_resolver.type is not None:
-                    return self.base_resolver.type
+            if (
+                self.base_resolver is not None
+                and self.base_resolver.type is not None
+            ):
+                return self.base_resolver.type
 
             assert self.type_annotation is not None
 
@@ -291,10 +289,10 @@ class StrawberryField(dataclasses.Field):
 
     @property
     def _has_async_permission_classes(self) -> bool:
-        for permission_class in self.permission_classes:
-            if inspect.iscoroutinefunction(permission_class.has_permission):
-                return True
-        return False
+        return any(
+            inspect.iscoroutinefunction(permission_class.has_permission)
+            for permission_class in self.permission_classes
+        )
 
     @property
     def _has_async_base_resolver(self) -> bool:

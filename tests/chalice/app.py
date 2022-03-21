@@ -33,5 +33,4 @@ def index():
 @app.route("/graphql", methods=["GET", "POST"], content_types=["application/json"])
 def handle_graphql():
     request: Request = app.current_request
-    result = view.execute_request(request)
-    return result
+    return view.execute_request(request)

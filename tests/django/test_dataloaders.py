@@ -25,12 +25,10 @@ pytestmark = [
 
 
 def _prepare_db():
-    ids = []
-
-    for index in range(5):
-        ids.append(Example.objects.create(name=f"This is a demo async {index}").id)
-
-    return ids
+    return [
+        Example.objects.create(name=f"This is a demo async {index}").id
+        for index in range(5)
+    ]
 
 
 @pytest.mark.django_db

@@ -74,41 +74,41 @@ class HTTPHandler:
         context: Optional[Any],
     ) -> Response:
         if request.method == "GET":
-            if not graphiql:
-                return HTMLResponse(status_code=status.HTTP_404_NOT_FOUND)
+            return (
+                self.get_graphiql_response()
+                if graphiql
+                else HTMLResponse(status_code=status.HTTP_404_NOT_FOUND)
+            )
 
-            return self.get_graphiql_response()
-
-        if request.method == "POST":
-            content_type = request.headers.get("Content-Type", "")
-            if "application/json" in content_type:
-                try:
-                    data = await request.json()
-                except json.JSONDecodeError:
-                    return PlainTextResponse(
-                        "Unable to parse request body as JSON",
-                        status_code=status.HTTP_400_BAD_REQUEST,
-                    )
-            elif content_type.startswith("multipart/form-data"):
-                multipart_data = await request.form()
-                operations = json.loads(multipart_data.get("operations", "{}"))
-                files_map = json.loads(multipart_data.get("map", "{}"))
-
-                data = replace_placeholders_with_files(
-                    operations, files_map, multipart_data
-                )
-
-            else:
-                return PlainTextResponse(
-                    "Unsupported Media Type",
-                    status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-                )
-        else:
+        if request.method != "POST":
             return PlainTextResponse(
                 "Method Not Allowed",
                 status_code=status.HTTP_405_METHOD_NOT_ALLOWED,
             )
 
+        content_type = request.headers.get("Content-Type", "")
+        if "application/json" in content_type:
+            try:
+                data = await request.json()
+            except json.JSONDecodeError:
+                return PlainTextResponse(
+                    "Unable to parse request body as JSON",
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                )
+        elif content_type.startswith("multipart/form-data"):
+            multipart_data = await request.form()
+            operations = json.loads(multipart_data.get("operations", "{}"))
+            files_map = json.loads(multipart_data.get("map", "{}"))
+
+            data = replace_placeholders_with_files(
+                operations, files_map, multipart_data
+            )
+
+        else:
+            return PlainTextResponse(
+                "Unsupported Media Type",
+                status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            )
         try:
             request_data = parse_request_data(data)
         except MissingQueryError:

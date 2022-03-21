@@ -82,10 +82,7 @@ async def test_error():
 
 async def test_error_and_values():
     async def idx(keys):
-        if keys == [2]:
-            return [2]
-
-        return [ValueError()]
+        return [2] if keys == [2] else [ValueError()]
 
     loader = DataLoader(load_fn=idx)
 

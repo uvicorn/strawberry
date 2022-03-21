@@ -23,17 +23,11 @@ class Mutation:
 
     @strawberry.mutation
     def read_files(self, files: typing.List[Upload]) -> typing.List[str]:
-        contents = []
-        for file in files:
-            contents.append(file.read().decode())
-        return contents
+        return [file.read().decode() for file in files]
 
     @strawberry.mutation
     def read_folder(self, folder: FolderInput) -> typing.List[str]:
-        contents = []
-        for file in folder.files:
-            contents.append(file.read().decode())
-        return contents
+        return [file.read().decode() for file in folder.files]
 
 
 @strawberry.type

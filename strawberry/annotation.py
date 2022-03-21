@@ -46,10 +46,11 @@ class StrawberryAnnotation:
         self.namespace = namespace
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, StrawberryAnnotation):
-            return NotImplemented
-
-        return self.resolve() == other.resolve()
+        return (
+            self.resolve() == other.resolve()
+            if isinstance(other, StrawberryAnnotation)
+            else NotImplemented
+        )
 
     def resolve(self) -> Union[StrawberryType, type]:
         annotation: object
@@ -144,10 +145,9 @@ class StrawberryAnnotation:
             return evaled_type
 
         types = evaled_type.__args__
-        union = StrawberryUnion(
+        return StrawberryUnion(
             type_annotations=tuple(StrawberryAnnotation(type_) for type_ in types),
         )
-        return union
 
     @classmethod
     def _is_async_generator(cls, annotation: type) -> bool:
@@ -163,9 +163,7 @@ class StrawberryAnnotation:
     def _is_enum(cls, annotation: Any) -> bool:
         # Type aliases are not types so we need to make sure annotation can go into
         # issubclass
-        if not isinstance(annotation, type):
-            return False
-        return issubclass(annotation, Enum)
+        return issubclass(annotation, Enum) if isinstance(annotation, type) else False
 
     @classmethod
     def _is_generic(cls, annotation: Any) -> bool:
@@ -260,10 +258,7 @@ class StrawberryAnnotation:
 
 
 def _is_input_type(type_: Any) -> bool:
-    if not _is_object_type(type_):
-        return False
-
-    return type_._type_definition.is_input
+    return type_._type_definition.is_input if _is_object_type(type_) else False
 
 
 def _is_object_type(type_: Any) -> bool:

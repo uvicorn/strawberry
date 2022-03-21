@@ -366,7 +366,7 @@ def test_type_with_fields_mutable_default():
     assert field2.default_factory() is not empty_list
     assert UserType(groups=["groups"]).friends is not empty_list
     UserType(groups=["groups"]).friends.append("joe")
-    assert empty_list == []
+    assert not empty_list
 
 
 @pytest.mark.xfail(

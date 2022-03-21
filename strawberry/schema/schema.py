@@ -93,10 +93,7 @@ class Schema(BaseSchema):
         # attach our schema to the GraphQL schema instance
         self._schema._strawberry_schema = self  # type: ignore
 
-        # Validate schema early because we want developers to know about
-        # possible issues as soon as possible
-        errors = validate_schema(self._schema)
-        if errors:
+        if errors := validate_schema(self._schema):
             formatted_errors = "\n\n".join(f"❌ {error.message}" for error in errors)
             raise ValueError(f"Invalid Schema. Errors:\n\n{formatted_errors}")
 

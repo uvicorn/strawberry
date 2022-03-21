@@ -44,13 +44,11 @@ def run_pyright(code: str) -> List[Result]:
 
     output = result.stdout.decode("utf-8")
 
-    results: List[Result] = []
-
-    for line in output.splitlines():
-        if line.strip().startswith(f"{f.name}:"):
-            results.append(Result.from_output_line(line))
-
-    return results
+    return [
+        Result.from_output_line(line)
+        for line in output.splitlines()
+        if line.strip().startswith(f"{f.name}:")
+    ]
 
 
 def pyright_exist() -> bool:

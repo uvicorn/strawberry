@@ -98,10 +98,7 @@ def create_validator(
 
             fragments = get_fragments(definitions)
             queries = get_queries_and_mutations(definitions)
-            query_depths = {}
-
-            for name in queries:
-                query_depths[name] = determine_depth(
+            query_depths = {name: determine_depth(
                     node=queries[name],
                     fragments=fragments,
                     depth_so_far=0,
@@ -109,7 +106,7 @@ def create_validator(
                     context=validation_context,
                     operation_name=name,
                     ignore=ignore,
-                )
+                ) for name in queries}
 
             if callable(callback):
                 callback(query_depths)
@@ -121,12 +118,11 @@ def create_validator(
 def get_fragments(
     definitions: Iterable[DefinitionNode],
 ) -> Dict[str, FragmentDefinitionNode]:
-    fragments = {}
-    for definition in definitions:
-        if isinstance(definition, FragmentDefinitionNode):
-            fragments[definition.name.value] = definition
-
-    return fragments
+    return {
+        definition.name.value: definition
+        for definition in definitions
+        if isinstance(definition, FragmentDefinitionNode)
+    }
 
 
 # This will actually get both queries and mutations.

@@ -32,10 +32,10 @@ def test_graphiql_view_is_not_returned_if_accept_headers_is_none():
 
 
 def response_is_of_error_type(response: HTTPResponse) -> bool:
-    if "errors" in response.json_body.keys():
-        if response.status_code == HTTPStatus.OK:
-            return True
-    return False
+    return (
+        "errors" in response.json_body.keys()
+        and response.status_code == HTTPStatus.OK
+    )
 
 
 def test_get_graphql_view_with_json_accept_type_is_rejected():

@@ -135,9 +135,11 @@ class GraphQLRouter(APIRouter):
             },
         )
         async def get_graphiql() -> Response:
-            if not self.graphiql:
-                return Response(status_code=status.HTTP_404_NOT_FOUND)
-            return self.get_graphiql_response()
+            return (
+                self.get_graphiql_response()
+                if self.graphiql
+                else Response(status_code=status.HTTP_404_NOT_FOUND)
+            )
 
         @self.post(path)
         async def handle_http_query(

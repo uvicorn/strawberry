@@ -59,9 +59,7 @@ class Schema(BaseSchema):
     def _extend_query_type(self):
         fields = {"_service": self._service_field}
 
-        entity_type = _get_entity_type(self.schema_converter.type_map)
-
-        if entity_type:
+        if entity_type := _get_entity_type(self.schema_converter.type_map):
             self._schema.type_map[entity_type.name] = entity_type
 
             fields["_entities"] = self._get_entities_field(entity_type)

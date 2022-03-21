@@ -104,9 +104,11 @@ class HTTPHandler:
         return web.Response(text=html_string, content_type="text/html")
 
     def should_render_graphiql(self, request: web.Request) -> bool:
-        if not self.graphiql:
-            return False
-        return "text/html" in request.headers.get("Accept", "")
+        return (
+            "text/html" in request.headers.get("Accept", "")
+            if self.graphiql
+            else False
+        )
 
     @property
     def graphiql_html_file_path(self) -> Path:

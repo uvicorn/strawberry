@@ -20,8 +20,7 @@ class GraphQLView:
         Returns:
             The GraphiQL html page as a string
         """
-        result = render_graphiql_page()
-        return result
+        return render_graphiql_page()
 
     @staticmethod
     def has_html_been_asked_for(headers: CaseInsensitiveMapping) -> bool:
@@ -81,19 +80,18 @@ class GraphQLView:
         Returns:
             A chalice response
         """
-        if self.graphiql:
-            if (
-                self.has_html_been_asked_for(request.headers)
-                and request.method == "GET"
-            ):
-                graphiql_page: str = self.render_graphiql()
-                return Response(
-                    body=graphiql_page,
-                    headers={"content-type": "text/html"},
-                    status_code=200,
-                )
+        if self.graphiql and (
+            self.has_html_been_asked_for(request.headers)
+            and request.method == "GET"
+        ):
+            graphiql_page: str = self.render_graphiql()
+            return Response(
+                body=graphiql_page,
+                headers={"content-type": "text/html"},
+                status_code=200,
+            )
 
-        if not request.method == "POST":
+        if request.method != "POST":
             return self.invalid_rest_verb_response()
 
         try:

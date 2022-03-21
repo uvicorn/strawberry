@@ -35,10 +35,13 @@ if TYPE_CHECKING:
 
 
 def print_schema_directive_params(params: Dict) -> str:
-    if not params:
-        return ""
-
-    return "(" + ", ".join(f'{name}: "{value}"' for name, value in params.items()) + ")"
+    return (
+        "("
+        + ", ".join(f'{name}: "{value}"' for name, value in params.items())
+        + ")"
+        if params
+        else ""
+    )
 
 
 def print_schema_directive(
