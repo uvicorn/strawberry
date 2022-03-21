@@ -39,13 +39,7 @@ def get_strawberry_type_from_model(type_: Any):
 
 
 def get_private_fields(cls: Type) -> List[dataclasses.Field]:
-    private_fields: List[dataclasses.Field] = []
-
-    for field in dataclasses.fields(cls):
-        if is_private(field.type):
-            private_fields.append(field)
-
-    return private_fields
+    return [field for field in dataclasses.fields(cls) if is_private(field.type)]
 
 
 class DataclassCreationFields(NamedTuple):
@@ -125,10 +119,7 @@ def get_default_factory_for_field(field: ModelField) -> Union[NoArgAnyCallable, 
 def ensure_all_auto_fields_in_pydantic(
     model: Type[BaseModel], auto_fields: Set[str], cls_name: str
 ) -> Union[NoReturn, None]:
-    # Raise error if user defined a strawberry.auto field not present in the model
-    non_existing_fields = list(auto_fields - model.__fields__.keys())
-
-    if non_existing_fields:
+    if non_existing_fields := list(auto_fields - model.__fields__.keys()):
         raise AutoFieldsNotInBaseModelError(
             fields=non_existing_fields, cls_name=cls_name, model=model
         )

@@ -37,10 +37,8 @@ def parse_request_data(data: Dict) -> GraphQLRequestData:
     if "query" not in data:
         raise MissingQueryError()
 
-    result = GraphQLRequestData(
+    return GraphQLRequestData(
         query=data["query"],
         variables=data.get("variables"),
         operation_name=data.get("operationName"),
     )
-
-    return result

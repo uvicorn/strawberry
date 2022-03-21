@@ -102,9 +102,7 @@ def test_optional_argument_unset():
     class Query:
         @strawberry.field
         def hello(self, name: Optional[str] = UNSET, age: Optional[int] = UNSET) -> str:
-            if is_unset(name):
-                return "Hi there"
-            return f"Hi {name}"
+            return "Hi there" if is_unset(name) else f"Hi {name}"
 
     schema = strawberry.Schema(query=Query)
 
@@ -136,9 +134,7 @@ def test_optional_input_field_unset():
     class Query:
         @strawberry.field
         def hello(self, input: TestInput) -> str:
-            if is_unset(input.name):
-                return "Hi there"
-            return f"Hi {input.name}"
+            return "Hi there" if is_unset(input.name) else f"Hi {input.name}"
 
     schema = strawberry.Schema(query=Query)
 

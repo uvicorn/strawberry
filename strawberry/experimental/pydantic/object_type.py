@@ -83,10 +83,7 @@ def get_type_for_field(field: ModelField, is_input: bool):
     basic_type = get_basic_type(outer_type)
     replaced_type = replace_pydantic_types(basic_type, is_input)
 
-    if not field.required:
-        return Optional[replaced_type]
-    else:
-        return replaced_type
+    return replaced_type if field.required else Optional[replaced_type]
 
 
 def _build_dataclass_creation_fields(

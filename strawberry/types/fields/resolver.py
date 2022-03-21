@@ -123,11 +123,9 @@ class StrawberryResolver(Generic[T]):
             return None
 
         module = sys.modules[self._module]
-        type_annotation = StrawberryAnnotation(
+        return StrawberryAnnotation(
             annotation=return_annotation, namespace=module.__dict__
         )
-
-        return type_annotation
 
     @property
     def type(self) -> Optional[Union[StrawberryType, type]]:

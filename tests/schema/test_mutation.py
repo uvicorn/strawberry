@@ -97,10 +97,7 @@ def test_unset_types():
     class Mutation:
         @strawberry.mutation
         def say(self, name: typing.Optional[str] = UNSET) -> str:  # type: ignore
-            if is_unset(name):
-                return "Name is unset"
-
-            return f"Hello {name}!"
+            return "Name is unset" if is_unset(name) else f"Hello {name}!"
 
         @strawberry.mutation
         def say_age(self, input: InputExample) -> str:

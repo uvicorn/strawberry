@@ -209,7 +209,7 @@ def union(
     """
 
     # Validate types
-    if len(types) == 0:
+    if not types:
         raise TypeError("No types passed to `union`")
 
     for _type in types:
@@ -218,10 +218,8 @@ def union(
                 f"Type `{_type.__name__}` cannot be used in a GraphQL Union"
             )
 
-    union_definition = StrawberryUnion(
+    return StrawberryUnion(
         name=name,
         type_annotations=tuple(StrawberryAnnotation(type_) for type_ in types),
         description=description,
     )
-
-    return union_definition  # type: ignore

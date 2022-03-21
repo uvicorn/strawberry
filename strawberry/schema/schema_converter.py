@@ -437,13 +437,13 @@ class GraphQLCoreConverter:
             self.type_map[scalar_name] = ConcreteType(
                 definition=scalar_definition, implementation=implementation
             )
-        else:
-            if self.type_map[scalar_name].definition != scalar_definition:
-                raise ScalarAlreadyRegisteredError(scalar_name)
-
+        elif self.type_map[scalar_name].definition == scalar_definition:
             implementation = cast(
                 GraphQLScalarType, self.type_map[scalar_name].implementation
             )
+
+        else:
+            raise ScalarAlreadyRegisteredError(scalar_name)
 
         return implementation
 

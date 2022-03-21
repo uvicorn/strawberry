@@ -38,7 +38,7 @@ class GraphQLTestClient(BaseGraphQLTestClient):
     ):
         return self._client.post(
             "/graphql/",
-            json=body if not files else None,
+            json=None if files else body,
             data=body if files else None,
             files=files,
             headers=headers,

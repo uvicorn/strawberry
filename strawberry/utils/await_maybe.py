@@ -8,7 +8,4 @@ AwaitableOrValue = Union[Awaitable[T], T]
 
 
 async def await_maybe(value: AwaitableOrValue):
-    if inspect.isawaitable(value):
-        return await value
-
-    return value
+    return await value if inspect.isawaitable(value) else value

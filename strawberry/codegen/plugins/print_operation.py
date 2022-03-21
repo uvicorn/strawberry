@@ -88,9 +88,6 @@ class PrintOperationPlugin(QueryCodegenPlugin):
         raise ValueError(f"not supported: {type(value)}")  # pragma: no cover
 
     def _print_arguments(self, arguments: List[GraphQLArgument]) -> str:
-        if not arguments:
-            return ""
-
         return (
             "("
             + ", ".join(
@@ -100,18 +97,15 @@ class PrintOperationPlugin(QueryCodegenPlugin):
                 ]
             )
             + ")"
-        )
+        ) if arguments else ""
 
     def _print_directives(self, directives: List[GraphQLDirective]) -> str:
-        if not directives:
-            return ""
-
         return " " + " ".join(
             [
                 f"@{directive.name}{self._print_arguments(directive.arguments)}"
                 for directive in directives
             ]
-        )
+        ) if directives else ""
 
     def _print_field_selection(self, selection: GraphQLFieldSelection) -> str:
         field = (

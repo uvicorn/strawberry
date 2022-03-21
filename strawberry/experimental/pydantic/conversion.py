@@ -32,17 +32,11 @@ def _convert_from_pydantic_to_strawberry_type(
     if isinstance(type_, EnumDefinition):
         return data
     if isinstance(type_, StrawberryList):
-        items = []
-        for index, item in enumerate(data):
-            items.append(
-                _convert_from_pydantic_to_strawberry_type(
+        return [_convert_from_pydantic_to_strawberry_type(
                     type_.of_type,
                     data_from_model=item,
                     extra=extra[index] if extra else None,
-                )
-            )
-
-        return items
+                ) for index, item in enumerate(data)]
 
     if hasattr(type_, "_type_definition"):
         # in the case of an interface, the concrete type may be more specific

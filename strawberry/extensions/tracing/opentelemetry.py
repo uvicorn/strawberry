@@ -91,9 +91,7 @@ class OpenTelemetryExtension(Extension):
     def filter_resolver_args(
         self, args: Dict[str, Any], info: GraphQLResolveInfo
     ) -> Dict[str, Any]:
-        if not self._arg_filter:
-            return args
-        return self._arg_filter(deepcopy(args), info)
+        return self._arg_filter(deepcopy(args), info) if self._arg_filter else args
 
     def add_tags(self, span: Span, info: GraphQLResolveInfo, kwargs: Dict[str, Any]):
         graphql_path = ".".join(map(str, get_path_from_info(info)))

@@ -42,7 +42,7 @@ def is_optional(annotation: Type) -> bool:
     types = annotation.__args__
 
     # A Union to be optional needs to have at least one None type
-    return any([x == None.__class__ for x in types])  # noqa:E711
+    return any(x == None.__class__ for x in types)
 
 
 def get_optional_annotation(annotation: Type) -> Type:

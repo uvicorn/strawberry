@@ -73,7 +73,7 @@ def test_custom_scalar_default_serialization():
     class Query:
         @strawberry.field
         def my_str(self, arg: MyStr) -> MyStr:
-            return MyStr(str(arg) + "Suffix")
+            return MyStr(f'{str(arg)}Suffix')
 
     schema = strawberry.Schema(Query)
 

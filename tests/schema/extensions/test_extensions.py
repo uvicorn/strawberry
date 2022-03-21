@@ -435,17 +435,15 @@ def test_execution_cache_example(mock_original_execute):
                 self.execution_context.result = response_cache[self.cache_key]
 
         def on_executing_end(self):
-            execution_context = self.execution_context
             if self.cache_key not in response_cache:
+                execution_context = self.execution_context
                 response_cache[self.cache_key] = execution_context.result
 
     @strawberry.type
     class Query:
         @strawberry.field
         def ping(self, return_value: Optional[str] = None) -> str:
-            if return_value is not None:
-                return return_value
-            return "pong"
+            return return_value if return_value is not None else "pong"
 
     schema = strawberry.Schema(
         Query,

@@ -90,9 +90,7 @@ def lazy_type_analyze_callback(ctx: AnalyzeTypeContext) -> Type:
         return AnyType(TypeOfAny.special_form)
 
     type_name = ctx.type.args[0]
-    type_ = ctx.api.analyze_type(type_name)
-
-    return type_
+    return ctx.api.analyze_type(type_name)
 
 
 def strawberry_field_hook(ctx: FunctionContext) -> Type:
@@ -103,10 +101,7 @@ def strawberry_field_hook(ctx: FunctionContext) -> Type:
 
 
 def _get_named_type(name: str, api: SemanticAnalyzerPluginInterface):
-    if "." in name:
-        return api.named_type_or_none(name)
-
-    return api.named_type(name)
+    return api.named_type_or_none(name) if "." in name else api.named_type(name)
 
 
 def _get_type_for_expr(expr: Expression, api: SemanticAnalyzerPluginInterface) -> Type:
@@ -329,11 +324,10 @@ def add_static_method_to_class(
     # For compat with mypy < 0.93
     if MypyVersion.VERSION < Decimal("0.93"):
         function_type = api.named_type("__builtins__.function")  # type: ignore
+    elif isinstance(api, SemanticAnalyzerPluginInterface):
+        function_type = api.named_type("builtins.function")
     else:
-        if isinstance(api, SemanticAnalyzerPluginInterface):
-            function_type = api.named_type("builtins.function")
-        else:
-            function_type = api.named_generic_type("builtins.function", [])
+        function_type = api.named_generic_type("builtins.function", [])
 
     arg_types, arg_names, arg_kinds = [], [], []
     for arg in args:
@@ -515,8 +509,9 @@ class CustomDataclassTransformer:
             # Type variable for self types in generated methods.
             obj_type = ctx.api.named_type("__builtins__.object")
             self_tvar_expr = TypeVarExpr(
-                SELF_TVAR_NAME, info.fullname + "." + SELF_TVAR_NAME, [], obj_type
+                SELF_TVAR_NAME, f'{info.fullname}.{SELF_TVAR_NAME}', [], obj_type
             )
+
             info.names[SELF_TVAR_NAME] = SymbolTableNode(MDEF, self_tvar_expr)
 
         # Add <, >, <=, >=, but only if the class has an eq method.
@@ -530,11 +525,12 @@ class CustomDataclassTransformer:
                 obj_type = ctx.api.named_type("__builtins__.object")
                 order_tvar_def = TypeVarDef(
                     SELF_TVAR_NAME,
-                    info.fullname + "." + SELF_TVAR_NAME,
+                    f'{info.fullname}.{SELF_TVAR_NAME}',
                     -1,
                     [],
                     obj_type,
                 )
+
 
                 # Backwards compatible with the removal of `TypeVarDef` in mypy 0.920.
                 if isinstance(order_tvar_def, TypeVarType):
@@ -553,10 +549,10 @@ class CustomDataclassTransformer:
                 if existing_method is not None and not existing_method.plugin_generated:
                     assert existing_method.node
                     ctx.api.fail(
-                        "You may not have a custom %s method when order=True"
-                        % method_name,
+                        f"You may not have a custom {method_name} method when order=True",
                         existing_method.node,
                     )
+
 
                 add_method(
                     ctx,
@@ -770,7 +766,7 @@ class CustomDataclassTransformer:
                 var = attr.to_var()
                 var.info = info
                 var.is_property = True
-                var._fullname = info.fullname + "." + var.name
+                var._fullname = f'{info.fullname}.{var.name}'
                 info.names[var.name] = SymbolTableNode(MDEF, var)
 
     def _propertize_callables(self, attributes: List[DataclassAttribute]) -> None:
@@ -788,7 +784,7 @@ class CustomDataclassTransformer:
                 var.info = info
                 var.is_property = True
                 var.is_settable_property = True
-                var._fullname = info.fullname + "." + var.name
+                var._fullname = f'{info.fullname}.{var.name}'
                 info.names[var.name] = SymbolTableNode(MDEF, var)
 
 
@@ -821,10 +817,7 @@ class StrawberryPlugin(Plugin):
     def get_function_hook(
         self, fullname: str
     ) -> Optional[Callable[[FunctionContext], Type]]:
-        if self._is_strawberry_field(fullname):
-            return strawberry_field_hook
-
-        return None
+        return strawberry_field_hook if self._is_strawberry_field(fullname) else None
 
     def get_type_analyze_hook(self, fullname: str):
         if self._is_strawberry_lazy_type(fullname):

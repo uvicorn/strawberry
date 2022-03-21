@@ -68,8 +68,13 @@ def error_type(
 
         existing_fields = getattr(cls, "__annotations__", {})
         fields_set = fields_set.union(
-            set(name for name, typ in existing_fields.items() if typ == strawberry.auto)
+            {
+                name
+                for name, typ in existing_fields.items()
+                if typ == strawberry.auto
+            }
         )
+
 
         if all_fields:
             if fields_set:
